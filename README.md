@@ -7,6 +7,8 @@
 - If no section label exists, the card is placed under `عمومی` (General).
 - The card title is used as the changelog item text; descriptions are not used.
 
+
+
 ## موارد ضروری در ترلو برای ساخت صحیح Changelog
 
 - فقط کارت‌های لیست `RC` وارد خروجی می‌شوند؛ لیست باید دقیقا با نام `RC` وجود داشته باشد.
