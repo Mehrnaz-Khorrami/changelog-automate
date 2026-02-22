@@ -23,7 +23,7 @@ Short note: Some section titles are translated using AI (Gemini) and cached for 
 ## Generate Changelog
 
 - Run:
-  - `node scriptss/generateChangelog.js 1404/12/02 fa`
+  - `node scriptss/generateChangelog.js yourSelectedDate yourSelectedLanguage`
 - First argument is the release date (used in output filename).
 - Second argument is the translation target language (optional; default is `fa`).
 - New section titles are translated with Gemini and cached in `scriptss/translations.json`.
@@ -59,7 +59,7 @@ Short note: Some section titles are translated using AI (Gemini) and cached for 
 ## ساخت Changelog
 
 - اجرا:
-  - `node scriptss/generateChangelog.js 1404/12/02 fa`
+  - `node scriptss/generateChangelog.js yourSelectedDate yourSelectedLanguage`
 - آرگومان اول تاریخ ریلیز است (در نام فایل خروجی استفاده می‌شود).
 - آرگومان دوم زبان مقصد ترجمه است (اختیاری، پیش‌فرض `fa`).
 - عناوین بخش‌های جدید با Gemini ترجمه شده و در `scriptss/translations.json` ذخیره می‌شوند.
