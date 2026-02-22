@@ -33,12 +33,17 @@ const gemini = new GoogleGenAI({
   apiKey: GEMINI_API_KEY,
 });
 
-async function translateWithGemini(text, targetLang) {
+async function translateWithGemini(titles, targetLang) {
+  console.log("🤖 Starting translation with Gemini...");
   const prompt = `
   Translate these titles to ${targetLang}.
   They are a titles of software changelog that used in a online store with their Admin Panel.
-  Titles: "${text}"
-  Return ONLY the translated titles.
+  Return only valid JSON object.
+  Example: {
+  "shipping methods": "روش‌های ارسال"
+  }
+  Titles: 
+  ${titles.map((t) => `- ${t}`).join("\n")}
     `;
 
   const response = await gemini.models.generateContent({
@@ -46,7 +51,21 @@ async function translateWithGemini(text, targetLang) {
     contents: [prompt],
   });
 
-  return response.text.trim();
+  const responseText =
+    typeof response.text === "function" ? await response.text() : response.text;
+
+  return responseText.trim();
+}
+
+function extractJsonObject(text) {
+  // Remove common code fences if present, then take the first JSON object block.
+  const cleaned = text.replace(/```json|```/gi, "").trim();
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  if (start === -1 || end === -1 || end < start) {
+    throw new Error("No JSON object found in AI response");
+  }
+  return cleaned.slice(start, end + 1);
 }
 
 async function translateMissingSections(sectionTitles) {
@@ -59,21 +78,23 @@ async function translateMissingSections(sectionTitles) {
     return translations;
   }
 
-  const targetLang = process.argv[3] || "fa"; // default Persian
+  const targetLang = process.argv[3] || "fa"; 
+  
   console.log(`🌍 Translating to ${targetLang}:`, missing);
 
-  for (const title of missing) {
-    try {
-      const translated = await translateWithGemini(title, targetLang);
-      translations[title] = translated;
-      console.log(`✔ ${title} → ${translated}`);
-    } catch (err) {
-      console.error(`❌ Failed to translate ${title}:`, err.message);
-    }
-  }
+  const translated = await translateWithGemini(missing, targetLang);
 
-  saveTranslations(translations);
-  return translations;
+  try {
+    const jsonText = extractJsonObject(translated);
+    const newTranslations = JSON.parse(jsonText);
+    const updated = { ...translations, ...newTranslations };
+    saveTranslations(updated);
+    console.log("✅ Translations saved");
+    return updated;
+  } catch (error) {
+    console.error("❌ Failed to parse AI response");
+    throw error;
+  }
 }
 
 module.exports = translateMissingSections;
