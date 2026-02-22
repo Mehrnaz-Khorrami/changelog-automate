@@ -35,6 +35,8 @@ Short note: Some section titles are translated using AI (Gemini) and cached for 
 
 
 
+
+
 ## موارد ضروری در ترلو برای ساخت صحیح Changelog
 
 توضیح کوتاه: بعضی از عناوین بخش‌ها با هوش مصنوعی (Gemini) ترجمه می‌شوند و برای استفاده‌های بعدی ذخیره می‌شوند.
