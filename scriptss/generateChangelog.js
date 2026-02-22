@@ -1,3 +1,4 @@
+const translateMissingSections = require("./translateSections");
 const fs = require("fs");
 const fetch = global.fetch || require("node-fetch");
 const dotenv = require("dotenv");
@@ -44,7 +45,7 @@ const getRCList = async () => {
 
 const getCards = async (listId) => {
   const cards = await get(`/lists/${listId}/cards`);
-  groupCards(cards);
+  await groupCards(cards);
 };
 
 const getType = (labels) => {
@@ -53,15 +54,34 @@ const getType = (labels) => {
   return "refactor";
 };
 
-const groupCards = (cards) => {
+const groupCards = async (cards) => {
   let result = {};
+  const allSections = [];
+
   for (const card of cards) {
     const labels = card.labels.map((l) => l.name);
     const projectLabel = labels.find((l) => projectMap[l]);
 
     if (!projectLabel) continue;
 
+    const sectionLabel = labels.find(
+      (l) => !projectMap[l] && !typeLabels.includes(l)
+    );
+
+    const section = sectionLabel || "General";
+    allSections.push(section);
+  }
+  const uniqueSections = [...new Set(allSections)];
+
+  const translations = await translateMissingSections(uniqueSections);
+
+  for (const card of cards) {
+    const labels = card.labels.map((l) => l.name);
+    const projectLabel = labels.find((l) => projectMap[l]);
+    if (!projectLabel) continue;
+
     const project = projectMap[projectLabel];
+
     if (!result[project.title]) {
       result[project.title] = {
         project: project.title,
@@ -73,11 +93,14 @@ const groupCards = (cards) => {
     }
 
     const type = getType(labels);
+
     const sectionLabel = labels.find(
       (l) => !projectMap[l] && !typeLabels.includes(l)
     );
 
-    const section = sectionLabel || "عمومی";
+    const rawSection = sectionLabel || "General";
+
+    const section = translations[rawSection] || rawSection;
 
     if (!result[project.title][type][section]) {
       result[project.title][type][section] = [];
@@ -85,6 +108,7 @@ const groupCards = (cards) => {
 
     result[project.title][type][section].push(card.name);
   }
+
   buildOutput(result);
 };
 
