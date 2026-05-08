@@ -39,6 +39,7 @@ const generateChangeLog = async (releaseDate, targetLang = "fa") => {
 
   const getRCList = async () => {
     const lists = await get(`/boards/${BOARD_ID}/lists`);
+
     const findRC = lists.find((item) => item.name === "RC");
     if (!findRC) {
       throw new Error("List 'RC' not found on the board.");
@@ -48,6 +49,7 @@ const generateChangeLog = async (releaseDate, targetLang = "fa") => {
 
   const getCards = async (listId) => {
     const cards = await get(`/lists/${listId}/cards`);
+ 
     return groupCards(cards);
   };
 
